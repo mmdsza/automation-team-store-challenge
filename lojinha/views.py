@@ -37,6 +37,23 @@ def lojinha_list(request):
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def lojinha_detalhada(request, pk):
+    produto = Produto.objects.get(pk=pk)
+
+    if request.method == 'GET':
+        produto_serializer = ProdutoSerializer(produto)
+        return JsonResponse(produto_serializer.data)
+
+    elif request.method == 'PUT':
+        produto_data = JSONParser().parse(request)
+        produto_serializer = ProdutoSerializer(produto, data=produto_data)
+        if produto_serializer.is_valid():
+            produto_serializer.save()
+            return JsonResponse(produto_serializer.data)
+        return JsonResponse(produto_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        produto.delete()
+        return JsonResponse({'message':'Produto deletado.'}, status=status.HTTP_200_OK)
     try:
         produto = Produto.objects.get(pk=pk)
     except Produto.DoesNotExist:
